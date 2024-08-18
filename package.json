@@ -7,9 +7,13 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@types/animejs": "^3.1.12",
+		"animejs": "^3.2.2",
+		"conwaysgol2d-wasm": "file:../rust-wasm/conwaysgol2d-wasm/pkg",
 		"preact": "^10.22.1",
 		"preact-iso": "^2.6.3",
 		"preact-render-to-string": "^6.5.9",
+		"preact-router": "^4.1.2",
 		"react": "npm:@preact/compat",
 		"react-dom": "npm:@preact/compat",
 		"three": "^0.167.1"
