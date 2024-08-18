@@ -14,18 +14,32 @@ const ConwaysGOL2DWASM: React.FC = () => {
 	const isMouseDownRef = useRef(false)
 	const wasPlayingRef = useRef(false)
 
-	const GRID_SIZE_X = Math.floor(window.innerWidth / CELL_SIZE)
-	const GRID_SIZE_Y = Math.floor(window.innerHeight / CELL_SIZE)
+	const [grid_size_x, setGridSizeX] = useState(1920)
+	const [grid_size_y, setGridSizeY] = useState(950)
+
+	useEffect(() => {
+		const handleResize = () => {
+			setGridSizeX(window ? window.innerWidth : 1920)
+			setGridSizeY(window ? window.innerHeight : 950)
+		}
+		window.addEventListener("resize", handleResize)
+		return () => {
+			window.removeEventListener("resize", handleResize)
+		}
+	}, [])
 
 	useEffect(() => {
 		const initializeWasm = async () => {
 			wasmRef.current = await init()
-			const universeInstance = Universe.new(GRID_SIZE_X, GRID_SIZE_Y)
+			const universeInstance = Universe.new(
+				grid_size_x / CELL_SIZE,
+				grid_size_y / CELL_SIZE
+			)
 			universeRef.current = universeInstance
 			drawGrid()
 		}
 		initializeWasm()
-	}, [GRID_SIZE_X, GRID_SIZE_Y])
+	}, [grid_size_x, grid_size_y])
 
 	useEffect(() => {
 		if (isPlaying) {
@@ -268,8 +282,8 @@ const ConwaysGOL2DWASM: React.FC = () => {
 			</div>
 			<canvas
 				ref={canvasRef}
-				width={window.innerWidth}
-				height={window.innerHeight}
+				width={grid_size_x}
+				height={grid_size_y}
 				style={{
 					background: "black",
 					position: "absolute",

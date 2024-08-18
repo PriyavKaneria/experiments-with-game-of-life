@@ -15,15 +15,26 @@ const ConwaysGOL2D: React.FC = () => {
 	const previousPlayingStateRef = useRef(false)
 	const [brushSize, setBrushSize] = useState(1)
 
-	const GRID_SIZE_X = Math.floor(window.innerWidth / CELL_SIZE)
-	const GRID_SIZE_Y = Math.floor(window.innerHeight / CELL_SIZE)
+	const [grid_size_x, setGridSizeX] = useState(1920)
+	const [grid_size_y, setGridSizeY] = useState(950)
+
+	useEffect(() => {
+		const handleResize = () => {
+			setGridSizeX(window ? window.innerWidth : 1920)
+			setGridSizeY(window ? window.innerHeight : 950)
+		}
+		window.addEventListener("resize", handleResize)
+		return () => {
+			window.removeEventListener("resize", handleResize)
+		}
+	}, [])
 
 	useEffect(() => {
 		if (canvasRef.current) {
 			initializeGrid()
 			drawGrid()
 		}
-	}, [])
+	}, [grid_size_x, grid_size_y])
 
 	useEffect(() => {
 		if (isPlaying) {
@@ -34,10 +45,10 @@ const ConwaysGOL2D: React.FC = () => {
 	}, [isPlaying])
 
 	const initializeGrid = () => {
-		gridRef.current = Array(GRID_SIZE_X)
+		gridRef.current = Array(grid_size_x)
 			.fill(0)
 			.map(() =>
-				Array(GRID_SIZE_Y)
+				Array(grid_size_y)
 					.fill(0)
 					.map(() => (Math.random() < 0.3 ? 1 : 0))
 			)
@@ -53,8 +64,8 @@ const ConwaysGOL2D: React.FC = () => {
 		ctx.clearRect(0, 0, canvas.width, canvas.height)
 		ctx.fillStyle = "white"
 
-		for (let x = 0; x < GRID_SIZE_X; x++) {
-			for (let y = 0; y < GRID_SIZE_Y; y++) {
+		for (let x = 0; x < grid_size_x; x++) {
+			for (let y = 0; y < grid_size_y; y++) {
 				if (gridRef.current[x][y]) {
 					ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
 				}
@@ -77,8 +88,8 @@ const ConwaysGOL2D: React.FC = () => {
 		for (let dx = -1; dx <= 1; dx++) {
 			for (let dy = -1; dy <= 1; dy++) {
 				if (dx === 0 && dy === 0) continue
-				const nx = (x + dx + GRID_SIZE_X) % GRID_SIZE_X
-				const ny = (y + dy + GRID_SIZE_Y) % GRID_SIZE_Y
+				const nx = (x + dx + grid_size_x) % grid_size_x
+				const ny = (y + dy + grid_size_y) % grid_size_y
 				if (gridRef.current[nx][ny]) count++
 			}
 		}
@@ -122,9 +133,9 @@ const ConwaysGOL2D: React.FC = () => {
 	}
 
 	const handleClear = () => {
-		gridRef.current = Array(GRID_SIZE_X)
+		gridRef.current = Array(grid_size_x)
 			.fill(0)
-			.map(() => Array(GRID_SIZE_Y).fill(0))
+			.map(() => Array(grid_size_y).fill(0))
 		drawGrid()
 	}
 
@@ -176,7 +187,7 @@ const ConwaysGOL2D: React.FC = () => {
 			) {
 				const x = centerX + dx
 				const y = centerY + dy
-				if (x >= 0 && x < GRID_SIZE_X && y >= 0 && y < GRID_SIZE_Y) {
+				if (x >= 0 && x < grid_size_x && y >= 0 && y < grid_size_y) {
 					gridRef.current[x][y] = 1
 				}
 			}
@@ -289,8 +300,8 @@ const ConwaysGOL2D: React.FC = () => {
 			</div>
 			<canvas
 				ref={canvasRef}
-				width={window.innerWidth}
-				height={window.innerHeight}
+				width={grid_size_x}
+				height={grid_size_y}
 				style={{
 					background: "black",
 					position: "absolute",

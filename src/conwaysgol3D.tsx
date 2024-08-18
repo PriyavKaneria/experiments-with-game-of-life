@@ -309,14 +309,6 @@ const ConwaysGOL3D: React.FC = () => {
 		steps.current = 0
 	}
 
-	// useInterval(
-	// 	() => {
-	// 		playing && handleStep()
-	// 	},
-	// 	30,
-	// 	0
-	// )
-
 	const handlePlay = () => {
 		playing.current = true
 	}

@@ -1,4 +1,5 @@
-import { hydrate } from "react"
+import { hydrate, prerender as ssr } from "preact-iso"
+// import { createHashHistory } from "history"
 import Router from "preact-router"
 import "./style.css"
 import QCAutomata from "./qcautomata"
@@ -9,7 +10,9 @@ import Home from "./home"
 
 const App = () => {
 	return (
-		<Router>
+		<Router
+		// history={createHashHistory()}
+		>
 			<Home path='/' />
 			<ConwaysGOL2D path='/conwaysgol2D' />
 			<ConwaysGOL2DWASM path='/conwaysgol2D-wasm' />
@@ -21,4 +24,8 @@ const App = () => {
 
 if (typeof window !== "undefined") {
 	hydrate(<App />, document.getElementById("app"))
+}
+
+export async function prerender(data) {
+	return await ssr(<App {...data} />)
 }
