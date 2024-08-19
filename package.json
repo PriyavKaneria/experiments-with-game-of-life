@@ -3,7 +3,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "vite build",
+		"build": "vite build --base /",
+		"build-pages": "vite build --base /experiments-with-game-of-life/",
 		"preview": "vite preview"
 	},
 	"dependencies": {

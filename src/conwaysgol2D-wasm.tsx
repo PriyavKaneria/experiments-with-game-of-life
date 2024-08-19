@@ -197,7 +197,10 @@ const ConwaysGOL2DWASM: React.FC = () => {
 		<div className='w-full h-full overflow-hidden'>
 			<div className='m-4 p-4 z-10 relative text-gray-100 bg-opacity-75 bg-black w-max select-none pointer-events-none'>
 				<h1 className='text-2xl font-bold inline-block mb-2'>
-					<a href='/' allowTransparency={false} className='pointer-events-auto'>
+					<a
+						href='./'
+						allowTransparency={false}
+						className='pointer-events-auto'>
 						<svg
 							xmlns='http://www.w3.org/2000/svg'
 							xmlnsXlink='http://www.w3.org/1999/xlink'

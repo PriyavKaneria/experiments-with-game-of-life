@@ -11,7 +11,6 @@ export default defineConfig({
 			},
 		}),
 	],
-	base: "/experiments-with-game-of-life/",
 	// server: {
 	// 	fs: {
 	// 		allow: [".."],

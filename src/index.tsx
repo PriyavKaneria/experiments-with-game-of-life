@@ -1,12 +1,12 @@
 import { hydrate, prerender as ssr } from "preact-iso"
 // import { createHashHistory } from "history"
 import Router from "preact-router"
-import "./style.css"
 import QCAutomata from "./qcautomata"
 import ConwaysGOL3D from "./conwaysgol3D"
 import ConwaysGOL2D from "./conwaysgol2D"
 import ConwaysGOL2DWASM from "./conwaysgol2D-wasm"
 import Home from "./home"
+import "./styles/style.css"
 
 const App = () => {
 	return (
