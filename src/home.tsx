@@ -3,7 +3,7 @@ const Home: React.FC = () => {
 		<div className='p-4 font-serif text-gray-100 bg-black w-screen h-screen'>
 			<h1 className='text-6xl font-bold'>
 				<img
-					src='/assets/logo.jpeg'
+					src='./assets/logo.jpeg'
 					alt='logo'
 					className='h-16 w-16 inline-block mr-4 mb-3'
 				/>
