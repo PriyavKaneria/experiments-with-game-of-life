@@ -215,7 +215,7 @@ const QCAutomata: React.FC = () => {
 			<div className='m-4 p-4 z-10 relative text-gray-100 bg-opacity-75 bg-black w-max select-none pointer-events-none'>
 				<h1 className='text-2xl font-bold inline-block mb-2'>
 					<a
-						href='./'
+						href='/'
 						allowTransparency={false}
 						className='pointer-events-auto'>
 						<svg

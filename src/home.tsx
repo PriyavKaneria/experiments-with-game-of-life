@@ -3,7 +3,7 @@ const Home: React.FC = () => {
 		<div className='p-4 font-serif text-gray-100 bg-black w-screen h-screen'>
 			<h1 className='text-6xl font-bold'>
 				<img
-					src='./assets/logo.jpeg'
+					src='/assets/logo.jpeg'
 					alt='logo'
 					className='h-16 w-16 inline-block mr-4 mb-3'
 				/>
@@ -14,10 +14,10 @@ const Home: React.FC = () => {
 					<p className='text-5xl font-semibold'>2D</p>
 					<ul className='pl-5 text-2xl'>
 						<li className='my-3'>
-							<a href='./conwaysgol2D'>Conway's Game of Life 2D</a>
+							<a href='/conwaysgol2D'>Conway's Game of Life 2D</a>
 						</li>
 						<li className='my-3'>
-							<a href='./conwaysgol2D-wasm'>
+							<a href='/conwaysgol2D-wasm'>
 								Conway's Game of Life 2D [Using Rust + WASM (WebAssembly)]
 							</a>
 						</li>
@@ -27,10 +27,10 @@ const Home: React.FC = () => {
 					<p className='text-5xl font-semibold'>3D</p>
 					<ul className='pl-5 text-2xl'>
 						<li className='my-3'>
-							<a href='./conwaysgol3D'>Conway's Game of Life 3D</a>
+							<a href='/conwaysgol3D'>Conway's Game of Life 3D</a>
 						</li>
 						<li className='my-3'>
-							<a href='./qcautomata'>Quantum Computing Automata</a>
+							<a href='/qcautomata'>Quantum Computing Automata</a>
 						</li>
 					</ul>
 				</li>
