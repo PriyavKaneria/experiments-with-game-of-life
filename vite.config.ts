@@ -11,9 +11,7 @@ export default defineConfig({
 			},
 		}),
 	],
-	build: {
-		outDir: "docs",
-	},
+	base: "/experiments-with-game-of-life/",
 	// server: {
 	// 	fs: {
 	// 		allow: [".."],
