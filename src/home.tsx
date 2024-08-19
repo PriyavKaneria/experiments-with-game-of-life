@@ -25,6 +25,11 @@ const Home: React.FC = () => {
 								Conway's Game of Life 2D [Using Rust + WASM (WebAssembly)]
 							</a>
 						</li>
+						<li className='my-3'>
+							<a href={usingBasePath("/isometricgol2D")}>
+								Game of Life in Isometric 2D Grid
+							</a>
+						</li>
 					</ul>
 				</li>
 				<li className='my-6'>
