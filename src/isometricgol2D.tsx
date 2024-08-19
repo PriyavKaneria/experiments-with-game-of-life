@@ -97,9 +97,9 @@ const IsometricConwaysGOL2D: React.FC = () => {
 		})
 	}
 
-	const getNeighbors = (x: number, y: number): Cell[] => {
+	const getNeighbors = (x: number, y: number, depth: number = 1): Cell[] => {
 		const neighbors: Cell[] = []
-		const directions = [
+		let directions = [
 			{ dx: -1, dy: -1 },
 			{ dx: 0, dy: -1 },
 			{ dx: 1, dy: -1 },
@@ -109,6 +109,18 @@ const IsometricConwaysGOL2D: React.FC = () => {
 			{ dx: 0, dy: 1 },
 			{ dx: 1, dy: 1 },
 		]
+
+		if (depth > 1) {
+			directions = []
+			// get boundary cells dx and dy at depth
+			for (let ddx = -depth; ddx <= depth; ddx++) {
+				for (let ddy = -depth; ddy <= depth; ddy++) {
+					if (Math.abs(ddx) + Math.abs(ddy) === depth) {
+						directions.push({ dx: ddx, dy: ddy })
+					}
+				}
+			}
+		}
 
 		directions.forEach(({ dx, dy }) => {
 			const newX = (x + dx + gridSize) % gridSize
@@ -209,6 +221,13 @@ const IsometricConwaysGOL2D: React.FC = () => {
 		if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize) {
 			const index = gridY * gridSize + gridX
 			gridRef.current[index].isAlive = true
+			// Paint nearby cells based on brush size
+			for (let i = 1; i < brushSize; i++) {
+				const neighbors = getNeighbors(gridX, gridY, i)
+				neighbors.forEach((neighbor) => {
+					gridRef.current[neighbor.y * gridSize + neighbor.x].isAlive = true
+				})
+			}
 			drawGrid()
 		}
 	}
