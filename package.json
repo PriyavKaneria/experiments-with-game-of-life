@@ -3,8 +3,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "vite build --base /",
-		"build-pages": "vite build --base /experiments-with-game-of-life/",
+		"build": "vite build",
 		"preview": "vite preview"
 	},
 	"dependencies": {
@@ -14,10 +13,10 @@
 		"preact": "^10.22.1",
 		"preact-iso": "^2.6.3",
 		"preact-render-to-string": "^6.5.9",
-		"preact-router": "^4.1.2",
 		"react": "npm:@preact/compat",
 		"react-dom": "npm:@preact/compat",
-		"three": "^0.167.1"
+		"three": "^0.167.1",
+		"vite-plugin-wasm-pack": "^0.1.12"
 	},
 	"devDependencies": {
 		"@preact/preset-vite": "^2.9.0",

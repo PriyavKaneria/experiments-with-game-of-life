@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import init, { Universe } from "conwaysgol2d-wasm"
 import Button from "./components/button"
+import { usingBasePath } from "./utils"
 
 const CELL_SIZE = 5
 
@@ -30,10 +31,12 @@ const ConwaysGOL2DWASM: React.FC = () => {
 
 	useEffect(() => {
 		const initializeWasm = async () => {
+			console.log(init)
+
 			wasmRef.current = await init()
 			const universeInstance = Universe.new(
-				grid_size_x / CELL_SIZE,
-				grid_size_y / CELL_SIZE
+				Number(grid_size_x / CELL_SIZE),
+				Number(grid_size_y / CELL_SIZE)
 			)
 			universeRef.current = universeInstance
 			drawGrid()
@@ -198,7 +201,7 @@ const ConwaysGOL2DWASM: React.FC = () => {
 			<div className='m-4 p-4 z-10 relative text-gray-100 bg-opacity-75 bg-black w-max select-none pointer-events-none'>
 				<h1 className='text-2xl font-bold inline-block mb-2'>
 					<a
-						href='/'
+						href={usingBasePath("/")}
 						allowTransparency={false}
 						className='pointer-events-auto'>
 						<svg

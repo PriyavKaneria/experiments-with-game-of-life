@@ -11,9 +11,14 @@ export default defineConfig({
 			},
 		}),
 	],
+	optimizeDeps: {
+		exclude: ["conwaysgol2d-wasm"],
+	},
+	assetsInclude: ["**/conwaysgol2D-wasm/*.wasm"],
 	// server: {
 	// 	fs: {
 	// 		allow: [".."],
 	// 	},
 	// },
+	base: "/experiments-with-game-of-life/",
 })

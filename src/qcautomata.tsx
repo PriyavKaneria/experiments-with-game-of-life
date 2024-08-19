@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import Button from "./components/button"
 import * as THREE from "three"
 import { OrbitControls } from "three/addons/controls/OrbitControls.js"
+import { usingBasePath } from "./utils"
 
 const GRID_SIZE = 20
 
@@ -215,7 +216,7 @@ const QCAutomata: React.FC = () => {
 			<div className='m-4 p-4 z-10 relative text-gray-100 bg-opacity-75 bg-black w-max select-none pointer-events-none'>
 				<h1 className='text-2xl font-bold inline-block mb-2'>
 					<a
-						href='/'
+						href={usingBasePath("/")}
 						allowTransparency={false}
 						className='pointer-events-auto'>
 						<svg
