@@ -3,8 +3,12 @@ import anime from "animejs"
 import Button from "./components/button"
 import { usingBasePath } from "./utils"
 
-const CELL_WIDTH = 40
-const CELL_HEIGHT = 30
+const CELL_WIDTH = 20
+const CELL_HEIGHT = 15
+
+const defaultWindowHeight = 950
+
+const defaultGridSize = Math.floor((defaultWindowHeight - 100) / CELL_HEIGHT)
 
 interface Cell {
 	x: number
@@ -22,17 +26,12 @@ const IsometricConwaysGOL2D: React.FC = () => {
 	const previousPlayingStateRef = useRef(false)
 	const [brushSize, setBrushSize] = useState(1)
 
-	const [gridSize, setGridSize] = useState({
-		width: 1920 / CELL_WIDTH,
-		height: 950 / CELL_HEIGHT,
-	})
+	const [gridSize, setGridSize] = useState(defaultGridSize)
 
 	useEffect(() => {
 		const handleResize = () => {
-			setGridSize({
-				width: window ? window.innerWidth / CELL_WIDTH : 1920 / CELL_WIDTH,
-				height: window ? window.innerHeight / CELL_HEIGHT : 950 / CELL_HEIGHT,
-			})
+			const newGridSize = Math.floor((window.innerHeight - 100) / CELL_HEIGHT)
+			setGridSize(window ? newGridSize : defaultGridSize)
 		}
 		window.addEventListener("resize", handleResize)
 		return () => {
@@ -57,8 +56,8 @@ const IsometricConwaysGOL2D: React.FC = () => {
 
 	const initializeGrid = () => {
 		const newGrid: Cell[] = []
-		for (let y = 0; y < gridSize.height; y++) {
-			for (let x = 0; x < gridSize.width; x++) {
+		for (let y = 0; y < gridSize; y++) {
+			for (let x = 0; x < gridSize; x++) {
 				newGrid.push({
 					x,
 					y,
@@ -112,9 +111,9 @@ const IsometricConwaysGOL2D: React.FC = () => {
 		]
 
 		directions.forEach(({ dx, dy }) => {
-			const newX = (x + dx + gridSize.width) % gridSize.width
-			const newY = (y + dy + gridSize.height) % gridSize.height
-			const index = newY * gridSize.width + newX
+			const newX = (x + dx + gridSize) % gridSize
+			const newY = (y + dy + gridSize) % gridSize
+			const index = newY * gridSize + newX
 			neighbors.push(gridRef.current[index])
 		})
 
@@ -181,25 +180,34 @@ const IsometricConwaysGOL2D: React.FC = () => {
 		if (!canvas) return
 
 		const rect = canvas.getBoundingClientRect()
-		const mouseX = e.clientX - rect.left - canvasRef.current.width / 2
+		const mouseX = e.clientX - rect.left
 		const mouseY = e.clientY - rect.top
 
 		// Convert mouse coordinates to isometric grid coordinates
-		const isoX = (mouseX / CELL_WIDTH + mouseY / CELL_HEIGHT) / 2
-		const isoY = (mouseY / CELL_HEIGHT - mouseX / CELL_WIDTH) / 2
+		let a = (2 * mouseX) / CELL_WIDTH
+		let b = (2 * mouseY) / CELL_HEIGHT
+		let gs = gridSize
+
+		// Eq 1
+		// x^2 + y^2 = 2 * ((a - gs)^2 + b^2)
+
+		// Eq 2
+		// x^2 + (2gs - y)^2 = 2 * (a^2 + (b - gs)^2)
+
+		// Result values
+		// x = ((b + a) - gs) / 2
+		// y = ((b - a) + gs) / 2
+
+		let x = Math.floor((b + a - gs) / 2)
+		let y = Math.floor((b - a + gs) / 2)
 
 		// Round to the nearest grid cell
-		const gridX = Math.round(isoX)
-		const gridY = Math.round(isoY)
+		const gridX = Math.floor(x)
+		const gridY = Math.floor(y)
 
 		// Ensure we're within grid bounds
-		if (
-			gridX >= 0 &&
-			gridX < gridSize.width &&
-			gridY >= 0 &&
-			gridY < gridSize.height
-		) {
-			const index = gridY * gridSize.width + gridX
+		if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize) {
+			const index = gridY * gridSize + gridX
 			gridRef.current[index].isAlive = true
 			drawGrid()
 		}
@@ -339,14 +347,16 @@ const IsometricConwaysGOL2D: React.FC = () => {
 			</div>
 			<canvas
 				ref={canvasRef}
-				width={gridSize.width * CELL_WIDTH}
-				height={gridSize.height * CELL_HEIGHT}
+				width={gridSize * CELL_WIDTH}
+				height={gridSize * CELL_HEIGHT}
 				style={{
 					background: "black",
 					position: "absolute",
 					top: 0,
-					left: 0,
+					right: 0,
 					zIndex: 0,
+					marginTop: "50px",
+					marginBottom: "50px",
 				}}
 				onMouseDown={handleMouseDown}
 				onMouseUp={handleMouseUp}
