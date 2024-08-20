@@ -3,8 +3,8 @@ import anime from "animejs"
 import Button from "./components/button"
 import { usingBasePath } from "./utils"
 
-const CELL_WIDTH = 20
-const CELL_HEIGHT = 15
+const CELL_WIDTH = 40
+const CELL_HEIGHT = 30
 
 const defaultWindowHeight = 950
 
@@ -13,7 +13,8 @@ const defaultGridSize = Math.floor((defaultWindowHeight - 100) / CELL_HEIGHT)
 interface Cell {
 	x: number
 	y: number
-	isAlive: boolean
+	isAliveLeft: boolean
+	isAliveRight: boolean
 }
 
 const IsometricConwaysGOL2D: React.FC = () => {
@@ -61,7 +62,8 @@ const IsometricConwaysGOL2D: React.FC = () => {
 				newGrid.push({
 					x,
 					y,
-					isAlive: Math.random() < 0.3,
+					isAliveLeft: Math.random() < 0.3,
+					isAliveRight: Math.random() < 0.3,
 				})
 			}
 		}
@@ -78,7 +80,7 @@ const IsometricConwaysGOL2D: React.FC = () => {
 		ctx.clearRect(0, 0, canvas.width, canvas.height)
 
 		gridRef.current.forEach((cell) => {
-			const { x, y, isAlive } = cell
+			const { x, y, isAliveLeft, isAliveRight } = cell
 			const isoX = ((x - y) * CELL_WIDTH) / 2 + canvas.width / 2
 			const isoY = ((x + y) * CELL_HEIGHT) / 2
 
@@ -86,40 +88,40 @@ const IsometricConwaysGOL2D: React.FC = () => {
 			ctx.moveTo(isoX, isoY)
 			ctx.lineTo(isoX + CELL_WIDTH / 2, isoY + CELL_HEIGHT / 2)
 			ctx.lineTo(isoX, isoY + CELL_HEIGHT)
-			ctx.lineTo(isoX - CELL_WIDTH / 2, isoY + CELL_HEIGHT / 2)
 			ctx.closePath()
-
-			ctx.fillStyle = isAlive ? "white" : "black"
+			ctx.fillStyle = isAliveRight ? "white" : "black"
 			ctx.fill()
+			ctx.strokeStyle = "rgba(255, 255, 255, 0.2)"
+			ctx.stroke()
 
+			ctx.beginPath()
+			ctx.moveTo(isoX, isoY)
+			ctx.lineTo(isoX - CELL_WIDTH / 2, isoY + CELL_HEIGHT / 2)
+			ctx.lineTo(isoX, isoY + CELL_HEIGHT)
+			ctx.closePath()
+			ctx.fillStyle = isAliveLeft ? "white" : "black"
+			ctx.fill()
 			ctx.strokeStyle = "rgba(255, 255, 255, 0.2)"
 			ctx.stroke()
 		})
 	}
 
-	const getNeighbors = (x: number, y: number, depth: number = 1): Cell[] => {
+	const getNeighbors = (x: number, y: number, isRight: boolean): Cell[] => {
 		const neighbors: Cell[] = []
-		let directions = [
-			{ dx: -1, dy: -1 },
-			{ dx: 0, dy: -1 },
-			{ dx: 1, dy: -1 },
-			{ dx: -1, dy: 0 },
-			{ dx: 1, dy: 0 },
-			{ dx: -1, dy: 1 },
-			{ dx: 0, dy: 1 },
-			{ dx: 1, dy: 1 },
-		]
+		let directions = []
 
-		if (depth > 1) {
-			directions = []
-			// get boundary cells dx and dy at depth
-			for (let ddx = -depth; ddx <= depth; ddx++) {
-				for (let ddy = -depth; ddy <= depth; ddy++) {
-					if (Math.abs(ddx) + Math.abs(ddy) === depth) {
-						directions.push({ dx: ddx, dy: ddy })
-					}
-				}
-			}
+		if (isRight) {
+			directions = [
+				{ dx: 1, dy: 0 },
+				{ dx: 0, dy: -1 },
+				{ dx: 0, dy: 0 },
+			]
+		} else {
+			directions = [
+				{ dx: -1, dy: 0 },
+				{ dx: 0, dy: 1 },
+				{ dx: 0, dy: 0 },
+			]
 		}
 
 		directions.forEach(({ dx, dy }) => {
@@ -134,18 +136,33 @@ const IsometricConwaysGOL2D: React.FC = () => {
 
 	const simulateStep = () => {
 		const newGrid = gridRef.current.map((cell) => {
-			const neighbors = getNeighbors(cell.x, cell.y)
-			const aliveNeighbors = neighbors.filter((n) => n.isAlive).length
+			// left cell
+			const neighbors = getNeighbors(cell.x, cell.y, false)
+			const aliveNeighbors = neighbors.filter((n) => n.isAliveRight).length
 
-			let newState = cell.isAlive
+			let newStateLeft = cell.isAliveLeft
 
-			if (cell.isAlive) {
-				newState = aliveNeighbors >= 2 && aliveNeighbors <= 3
+			if (cell.isAliveLeft) {
+				newStateLeft = aliveNeighbors === 1
 			} else {
-				newState = aliveNeighbors === 3
+				newStateLeft = aliveNeighbors === 2
 			}
 
-			return { ...cell, isAlive: newState }
+			// right cell
+			const neighborsRight = getNeighbors(cell.x, cell.y, true)
+			const aliveNeighborsRight = neighborsRight.filter(
+				(n) => n.isAliveLeft
+			).length
+
+			let newStateRight = cell.isAliveRight
+
+			if (cell.isAliveRight) {
+				newStateRight = aliveNeighborsRight === 1
+			} else {
+				newStateRight = aliveNeighborsRight === 2
+			}
+
+			return { ...cell, isAliveLeft: newStateLeft, isAliveRight: newStateRight }
 		})
 
 		gridRef.current = newGrid
@@ -220,12 +237,24 @@ const IsometricConwaysGOL2D: React.FC = () => {
 		// Ensure we're within grid bounds
 		if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize) {
 			const index = gridY * gridSize + gridX
-			gridRef.current[index].isAlive = true
+			// check if it is the right or left cell
+			const midXOfCell =
+				(gs / 2) * CELL_WIDTH + ((gridX - gridY) * CELL_WIDTH) / 2
+
+			const isRightCell = mouseX > midXOfCell
+			gridRef.current[index][isRightCell ? "isAliveRight" : "isAliveLeft"] =
+				true
 			// Paint nearby cells based on brush size
 			for (let i = 1; i < brushSize; i++) {
-				const neighbors = getNeighbors(gridX, gridY, i)
+				const neighbors = getNeighbors(gridX, gridY, isRightCell)
 				neighbors.forEach((neighbor) => {
-					gridRef.current[neighbor.y * gridSize + neighbor.x].isAlive = true
+					if (isRightCell && i % 2 === 0) {
+						gridRef.current[neighbor.y * gridSize + neighbor.x].isAliveLeft =
+							true
+					} else {
+						gridRef.current[neighbor.y * gridSize + neighbor.x].isAliveRight =
+							true
+					}
 				})
 			}
 			drawGrid()
@@ -253,7 +282,8 @@ const IsometricConwaysGOL2D: React.FC = () => {
 	const handleClear = () => {
 		gridRef.current = gridRef.current.map((cell) => ({
 			...cell,
-			isAlive: false,
+			isAliveLeft: false,
+			isAliveRight: false,
 		}))
 		drawGrid()
 	}
@@ -294,24 +324,24 @@ const IsometricConwaysGOL2D: React.FC = () => {
 				</h1>
 				<h3 className='text-lg font-bold mb-2'>Rules:</h3>
 				<p className='mb-2 max-w-5xl'>
-					The rules are based on the original Game of Life rules. The rules are
+					The rules are derived from the original Game of Life rules with few modifications. The rules are
 					as follows
 				</p>
 				<ul className='list-disc list-inside mb-4'>
 					<li>
-						Any live cell with fewer than two live neighbors dies, as if by
-						underpopulation.
-					</li>
-					<li>
-						Any live cell with two or three live neighbors lives on to the next
+						Any live cell with no live neighbors lives on to the next
 						generation.
 					</li>
 					<li>
-						Any live cell with more than three live neighbors dies, as if by
+						Any live cell with exactly one live neighbor lives on to the next
+						generation.
+					</li>
+					<li>
+						Any live cell with more than one live neighbor dies, as if by
 						overpopulation.
 					</li>
 					<li>
-						Any dead cell with exactly three live neighbors becomes a live cell,
+						Any dead cell with exactly two live neighbors becomes a live cell,
 						as if by reproduction.
 					</li>
 				</ul>

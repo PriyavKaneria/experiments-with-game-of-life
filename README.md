@@ -9,7 +9,8 @@ Implemented experiments:
 - 2D
   - [Conway's Game of Life 2D](https://priyavkaneria.github.io/experiments-with-game-of-life/conwaysgol2D)
   - [Conway's Game of Life 2D [Using Rust + WASM (WebAssembly)]](https://priyavkaneria.github.io/experiments-with-game-of-life/conwaysgol2D-wasm)
-  - [Game of Life in Isometric 2D Grid](https://priyavkaneria.github.io/experiments-with-game-of-life/conwaysgol2D-wasm)
+  - [Game of Life in Rhombic 2D Grid](https://priyavkaneria.github.io/experiments-with-game-of-life/rhombicgol2D)
+  - [Game of Life in Isometric 2D Grid](https://priyavkaneria.github.io/experiments-with-game-of-life/isometricgol2D)
 
 - 3D
   - [Conway's Game of Life 3D](https://priyavkaneria.github.io/experiments-with-game-of-life/conwaysgol3D)
