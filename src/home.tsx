@@ -26,6 +26,11 @@ const Home: React.FC = () => {
 							</a>
 						</li>
 						<li className='my-3'>
+							<a href={usingBasePath("/rhombicgol2D")}>
+								Game of Life in Rhombic 2D Grid
+							</a>
+						</li>
+						<li className='my-3'>
 							<a href={usingBasePath("/isometricgol2D")}>
 								Game of Life in Isometric 2D Grid
 							</a>
