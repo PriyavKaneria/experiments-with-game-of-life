@@ -2,7 +2,7 @@
 
 Check out the live demo [here](https://priyavkaneria.github.io/experiments-with-game-of-life/)
 
-> Root cause (most interesting idea) - Conway's game of life on an N sided plane [WIP, on the way]
+> Root cause (most interesting idea) - Conway's game of life on an N sided plane ([check out 3 sided one](https://priyavkaneria.github.io/experiments-with-game-of-life/isometricgol2D))
 
 Implemented experiments:
 
