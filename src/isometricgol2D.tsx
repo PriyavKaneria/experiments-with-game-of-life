@@ -1,10 +1,16 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from "react"
+import React, {
+	ChangeEvent,
+	useEffect,
+	useReducer,
+	useRef,
+	useState,
+} from "react"
 import anime from "animejs"
 import Button from "./components/button"
 import { usingBasePath } from "./utils"
 
-const CELL_WIDTH = 40
-const CELL_HEIGHT = 30
+const CELL_WIDTH = 20
+const CELL_HEIGHT = 15
 
 const defaultWindowHeight = 950
 
@@ -17,6 +23,73 @@ interface Cell {
 	isAliveRight: boolean
 }
 
+const examples = [
+	{
+		name: "4-7/1-1",
+		description: "Slowly builds hexagons",
+		survivalRangeFrom: 4,
+		survivalRangeTo: 7,
+		birthRangeFrom: 1,
+		birthRangeTo: 1,
+	},
+	{
+		name: "4-7/0-0",
+		description: "Hexagons but separated by borders",
+		survivalRangeFrom: 4,
+		survivalRangeTo: 7,
+		birthRangeFrom: 0,
+		birthRangeTo: 0,
+	},
+	{
+		name: "6-9/0-0",
+		description: "Islands form which slowly fade away",
+		survivalRangeFrom: 6,
+		survivalRangeTo: 9,
+		birthRangeFrom: 0,
+		birthRangeTo: 0,
+	},
+	{
+		name: "1-2/3-3",
+		description: "Similar to something like actual game of life",
+		survivalRangeFrom: 1,
+		survivalRangeTo: 2,
+		birthRangeFrom: 3,
+		birthRangeTo: 3,
+	},
+	{
+		name: "4-7/4-6",
+		description: "Growth",
+		survivalRangeFrom: 4,
+		survivalRangeTo: 7,
+		birthRangeFrom: 4,
+		birthRangeTo: 6,
+	},
+	{
+		name: "6-7/4-6",
+		description: "Melting snow",
+		survivalRangeFrom: 6,
+		survivalRangeTo: 7,
+		birthRangeFrom: 4,
+		birthRangeTo: 6,
+	},
+	{
+		name: "9-9/1-5",
+		description: "This one is really cool, and hypnotic",
+		survivalRangeFrom: 9,
+		survivalRangeTo: 9,
+		birthRangeFrom: 1,
+		birthRangeTo: 5,
+	},
+	{
+		name: "3-3/3-4",
+		description: "Longest lasting lively pattern",
+		survivalRangeFrom: 3,
+		survivalRangeTo: 3,
+		birthRangeFrom: 3,
+		birthRangeTo: 4,
+	},
+]
+
 const IsometricConwaysGOL2D: React.FC = () => {
 	const canvasRef = useRef<HTMLCanvasElement>(null)
 	const gridRef = useRef<Cell[]>([])
@@ -28,6 +101,12 @@ const IsometricConwaysGOL2D: React.FC = () => {
 	const [brushSize, setBrushSize] = useState(1)
 
 	const [gridSize, setGridSize] = useState(defaultGridSize)
+
+	const survivalRangeFrom = useRef(4)
+	const survivalRangeTo = useRef(7)
+	const birthRangeFrom = useRef(5)
+	const birthRangeTo = useRef(6)
+	const eraseMode = useRef(false)
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -106,60 +185,96 @@ const IsometricConwaysGOL2D: React.FC = () => {
 		})
 	}
 
-	const getNeighbors = (x: number, y: number, isRight: boolean): Cell[] => {
-		const neighbors: Cell[] = []
+	const getNeighbors = (
+		x: number,
+		y: number,
+		isRight: boolean
+	): [Cell, number][] => {
+		const neighbors: [Cell, number][] = []
 		let directions = []
 
 		if (isRight) {
 			directions = [
-				{ dx: 1, dy: 0 },
-				{ dx: 0, dy: -1 },
-				{ dx: 0, dy: 0 },
+				{ dx: 1, dy: 0, dir: -1 },
+				{ dx: 0, dy: -1, dir: -1 },
+				{ dx: 0, dy: 0, dir: -1 },
+
+				// depth 2
+				{ dx: -1, dy: 0, dir: 1 },
+				{ dx: 0, dy: 1, dir: 1 },
+				{ dx: 1, dy: 0, dir: 1 },
+				{ dx: 1, dy: 1, dir: 1 },
+				{ dx: 0, dy: -1, dir: 1 },
+				{ dx: -1, dy: -1, dir: 1 },
 			]
 		} else {
 			directions = [
-				{ dx: -1, dy: 0 },
-				{ dx: 0, dy: 1 },
-				{ dx: 0, dy: 0 },
+				{ dx: -1, dy: 0, dir: -1 },
+				{ dx: 0, dy: 1, dir: -1 },
+				{ dx: 0, dy: 0, dir: -1 },
+
+				// depth 2
+				{ dx: 1, dy: 0, dir: 1 },
+				{ dx: 0, dy: -1, dir: 1 },
+				{ dx: -1, dy: 0, dir: 1 },
+				{ dx: -1, dy: -1, dir: 1 },
+				{ dx: 0, dy: 1, dir: 1 },
+				{ dx: 1, dy: 1, dir: 1 },
 			]
 		}
 
-		directions.forEach(({ dx, dy }) => {
+		directions.forEach(({ dx, dy, dir }) => {
 			const newX = (x + dx + gridSize) % gridSize
 			const newY = (y + dy + gridSize) % gridSize
 			const index = newY * gridSize + newX
-			neighbors.push(gridRef.current[index])
+			neighbors.push([gridRef.current[index], dir])
 		})
 
 		return neighbors
+	}
+
+	const checkSurvival = (aliveNeighbors: number) => {
+		return (
+			aliveNeighbors >= survivalRangeFrom.current &&
+			aliveNeighbors <= survivalRangeTo.current
+		)
+	}
+
+	const checkBirth = (aliveNeighbors: number) => {
+		return (
+			aliveNeighbors >= birthRangeFrom.current &&
+			aliveNeighbors <= birthRangeTo.current
+		)
 	}
 
 	const simulateStep = () => {
 		const newGrid = gridRef.current.map((cell) => {
 			// left cell
 			const neighbors = getNeighbors(cell.x, cell.y, false)
-			const aliveNeighbors = neighbors.filter((n) => n.isAliveRight).length
+			const aliveNeighbors = neighbors.filter((n) =>
+				n[1] === -1 ? n[0].isAliveRight : n[0].isAliveLeft
+			).length
 
 			let newStateLeft = cell.isAliveLeft
 
 			if (cell.isAliveLeft) {
-				newStateLeft = aliveNeighbors === 1
+				newStateLeft = checkSurvival(aliveNeighbors)
 			} else {
-				newStateLeft = aliveNeighbors === 2
+				newStateLeft = checkBirth(aliveNeighbors)
 			}
 
 			// right cell
 			const neighborsRight = getNeighbors(cell.x, cell.y, true)
-			const aliveNeighborsRight = neighborsRight.filter(
-				(n) => n.isAliveLeft
+			const aliveNeighborsRight = neighborsRight.filter((n) =>
+				n[1] === 1 ? n[0].isAliveRight : n[0].isAliveLeft
 			).length
 
 			let newStateRight = cell.isAliveRight
 
 			if (cell.isAliveRight) {
-				newStateRight = aliveNeighborsRight === 1
+				newStateRight = checkSurvival(aliveNeighborsRight)
 			} else {
-				newStateRight = aliveNeighborsRight === 2
+				newStateRight = checkBirth(aliveNeighborsRight)
 			}
 
 			return { ...cell, isAliveLeft: newStateLeft, isAliveRight: newStateRight }
@@ -197,6 +312,7 @@ const IsometricConwaysGOL2D: React.FC = () => {
 		if (!isPaintEnabled) return
 		isMouseDownRef.current = false
 		setIsPlaying(previousPlayingStateRef.current)
+		eraseMode.current = false
 	}
 
 	const handleMouseMove = (e: MouseEvent) => {
@@ -243,17 +359,22 @@ const IsometricConwaysGOL2D: React.FC = () => {
 
 			const isRightCell = mouseX > midXOfCell
 			gridRef.current[index][isRightCell ? "isAliveRight" : "isAliveLeft"] =
-				true
+				!eraseMode.current
 			// Paint nearby cells based on brush size
-			for (let i = 1; i < brushSize; i++) {
+			if (brushSize === 2) {
 				const neighbors = getNeighbors(gridX, gridY, isRightCell)
 				neighbors.forEach((neighbor) => {
-					if (isRightCell && i % 2 === 0) {
-						gridRef.current[neighbor.y * gridSize + neighbor.x].isAliveLeft =
-							true
+					if (
+						(isRightCell && neighbor[1] === -1) ||
+						(!isRightCell && neighbor[1] === 1)
+					) {
+						gridRef.current[
+							neighbor[0].y * gridSize + neighbor[0].x
+						].isAliveLeft = !eraseMode.current
 					} else {
-						gridRef.current[neighbor.y * gridSize + neighbor.x].isAliveRight =
-							true
+						gridRef.current[
+							neighbor[0].y * gridSize + neighbor[0].x
+						].isAliveRight = !eraseMode.current
 					}
 				})
 			}
@@ -292,6 +413,8 @@ const IsometricConwaysGOL2D: React.FC = () => {
 		setIsPlaying(!isPlaying)
 	}
 
+	const [, forceUpdate] = useReducer((x) => x + 1, 0)
+
 	return (
 		<div className='w-full h-full overflow-hidden'>
 			<div className='m-4 p-4 z-10 relative text-gray-100 bg-opacity-75 bg-black w-max select-none pointer-events-none'>
@@ -324,8 +447,8 @@ const IsometricConwaysGOL2D: React.FC = () => {
 				</h1>
 				<h3 className='text-lg font-bold mb-2'>Rules:</h3>
 				<p className='mb-2 max-w-5xl'>
-					The rules are derived from the original Game of Life rules with few modifications. The rules are
-					as follows
+					The rules are derived from the original Game of Life rules with few
+					modifications. The rules are as follows
 				</p>
 				<ul className='list-disc list-inside mb-4'>
 					<li>
@@ -344,6 +467,25 @@ const IsometricConwaysGOL2D: React.FC = () => {
 						Any dead cell with exactly two live neighbors becomes a live cell,
 						as if by reproduction.
 					</li>
+				</ul>
+				<p className='mb-2 max-w-5xl'>
+					Some good starting points to try are: (click)
+				</p>
+				<ul className='list-disc list-inside mb-4 pointer-events-auto cursor-pointer'>
+					{examples.map((example) => (
+						<li
+							key={example.name}
+							onClick={() => {
+								survivalRangeFrom.current = example.survivalRangeFrom
+								survivalRangeTo.current = example.survivalRangeTo
+								birthRangeFrom.current = example.birthRangeFrom
+								birthRangeTo.current = example.birthRangeTo
+								handleReset()
+								forceUpdate(0)
+							}}>
+							{example.name} : {example.description}
+						</li>
+					))}
 				</ul>
 				<div className='mb-4 pointer-events-auto w-max'>
 					<Button onClick={handleStep} className='mr-2'>
@@ -371,7 +513,7 @@ const IsometricConwaysGOL2D: React.FC = () => {
 							onChange={togglePaintEnabled}
 							className='sr-only peer'
 						/>
-						<div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+						<div className="relative w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all border-gray-600 peer-checked:bg-blue-600"></div>
 						<span className='ml-3 text-sm font-medium text-gray-100'>
 							Mouse Painting
 						</span>
@@ -386,12 +528,79 @@ const IsometricConwaysGOL2D: React.FC = () => {
 							type='range'
 							id='brushSize'
 							min='1'
-							max='10'
+							max='2'
 							value={brushSize}
 							onChange={handleBrushSizeChange}
-							className='w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700'
+							className='w-32 h-2 rounded-lg appearance-none cursor-pointer bg-gray-700'
 						/>
 					</div>
+				</div>
+				<div className='flex items-center mb-4 pointer-events-auto w-max'>
+					<label className='mr-2 text-sm font-medium text-gray-100'>
+						Survival Range:
+					</label>
+					<input
+						type='number'
+						min={0}
+						max={9}
+						value={survivalRangeFrom.current}
+						data-index={0}
+						onChange={(e) => {
+							survivalRangeFrom.current = Number((e.target as any).value)
+							if (isPlaying) {
+								handleReset()
+							}
+						}}
+						className='w-16 h-8 rounded-lg text-center text-gray-100 bg-gray-700'
+					/>
+					<label className='mx-2 text-sm font-medium text-gray-100'>to</label>
+					<input
+						type='number'
+						min={0}
+						max={9}
+						value={survivalRangeTo.current}
+						data-index={1}
+						onChange={(e) => {
+							survivalRangeTo.current = Number((e.target as any).value)
+							if (isPlaying) {
+								handleReset()
+							}
+						}}
+						className='w-16 h-8 rounded-lg text-center text-gray-100 bg-gray-700'
+					/>
+
+					<label className='ml-4 mr-2 text-sm font-medium text-gray-100'>
+						Birth Range:
+					</label>
+					<input
+						type='number'
+						min={0}
+						max={9}
+						value={birthRangeFrom.current}
+						data-index={0}
+						onChange={(e) => {
+							birthRangeFrom.current = Number((e.target as any).value)
+							if (isPlaying) {
+								handleReset()
+							}
+						}}
+						className='w-16 h-8 rounded-lg text-center text-gray-100 bg-gray-700'
+					/>
+					<label className='mx-2 text-sm font-medium text-gray-100'>to</label>
+					<input
+						type='number'
+						min={0}
+						max={9}
+						value={birthRangeTo.current}
+						data-index={1}
+						onChange={(e) => {
+							birthRangeTo.current = Number((e.target as any).value)
+							if (isPlaying) {
+								handleReset()
+							}
+						}}
+						className='w-16 h-8 rounded-lg text-center text-gray-100 bg-gray-700'
+					/>
 				</div>
 			</div>
 			<canvas
@@ -411,6 +620,10 @@ const IsometricConwaysGOL2D: React.FC = () => {
 				onMouseUp={handleMouseUp}
 				onMouseMove={handleMouseMove}
 				onMouseLeave={handleMouseUp}
+				onContextMenu={(e) => {
+					e.preventDefault()
+					eraseMode.current = true
+				}}
 			/>
 		</div>
 	)
