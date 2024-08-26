@@ -451,21 +451,23 @@ const IsometricConwaysGOL2D: React.FC = () => {
 					modifications. The rules are as follows
 				</p>
 				<ul className='list-disc list-inside mb-4'>
+					<li>Each cell has 9 neighbouring cells in this fashion</li>
+					<img
+						src={usingBasePath("/assets/neighbors.png")}
+						alt='neighbors'
+						className='h-52 w-32'
+					/>
 					<li>
-						Any live cell with no live neighbors lives on to the next
-						generation.
+						Any live cell with live neighbors in the survival range survives to
+						the next generation.
 					</li>
 					<li>
-						Any live cell with exactly one live neighbor lives on to the next
-						generation.
+						Any live cell with live neighbors outside the survival range dies
+						due to underpopulation or overpopulation.
 					</li>
 					<li>
-						Any live cell with more than one live neighbor dies, as if by
-						overpopulation.
-					</li>
-					<li>
-						Any dead cell with exactly two live neighbors becomes a live cell,
-						as if by reproduction.
+						Any dead cell with live neighbors in the birth range becomes alive
+						by reproduction.
 					</li>
 				</ul>
 				<p className='mb-2 max-w-5xl'>
@@ -625,6 +627,9 @@ const IsometricConwaysGOL2D: React.FC = () => {
 					eraseMode.current = true
 				}}
 			/>
+			<div className='absolute top-0 right-0 text-lg text-gray-100 p-4'>
+				By the way you can paint the cells using your mouse
+			</div>
 		</div>
 	)
 }

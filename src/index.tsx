@@ -20,9 +20,7 @@ const App = () => {
 	return (
 		<LocationProvider>
 			<ErrorBoundary>
-				<Router
-				// history={createHashHistory()}
-				>
+				<Router>
 					<Home path={usingBasePath("/")} />
 					<ConwaysGOL2D path={usingBasePath("/conwaysgol2D")} />
 					<ConwaysGOL2DWASM path={usingBasePath("/conwaysgol2D-wasm")} />
