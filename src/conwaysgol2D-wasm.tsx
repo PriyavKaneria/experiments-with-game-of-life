@@ -228,6 +228,17 @@ const ConwaysGOL2DWASM: React.FC = () => {
 				</h1>
 				<h3 className='text-lg font-bold mb-2'>Rules:</h3>
 				<p className='mb-2 max-w-5xl'>
+					You can find the source code for the Rust and Wasm build here -
+					<a
+						href='https://github.com/PriyavKaneria/Conways-Game-of-Life-using-Rust-WASM'
+						target='_blank'
+						rel='noreferrer noopener'
+						className='underline pointer-events-auto'>
+						{" "}
+						here
+					</a>
+				</p>
+				<p className='mb-2 max-w-5xl'>
 					The rules are based on the original Game of Life rules. The rules are
 					as follows
 				</p>

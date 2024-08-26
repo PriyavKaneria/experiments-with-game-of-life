@@ -20,5 +20,5 @@ export default defineConfig({
 	// 		allow: [".."],
 	// 	},
 	// },
-	base: "/experiments-with-game-of-life/",
+	// base: "/experiments-with-game-of-life/",
 })
